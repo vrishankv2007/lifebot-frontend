@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css'
 import io from 'socket.io-client'
 import L from 'leaflet'
 
-const socket = io('https://lifebot-backend-u26q.onrender.com')
+const socket = io('https://lifebot-backend-u26q.onrender.com') // Note: Replace with your actual Render URL!
 
 const droneIcon = new L.Icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/9357/9357591.png',
@@ -34,18 +34,26 @@ function App() {
   }, [])
 
   return (
-    <div style={{ backgroundColor: '#f1f5f9', color: '#1e293b', minHeight: '100vh', padding: '2rem', fontFamily: '"Inter", sans-serif', overflow: 'hidden' }}>
+    <div style={{ backgroundColor: '#e0e5ec', color: '#2d3748', minHeight: '100vh', padding: '2rem', fontFamily: '"Inter", sans-serif', overflow: 'hidden' }}>
       
-      {/* 🚀 SMOOTH, LIGHT THEME CSS */}
+      {/* 🚀 3D NEUMORPHIC & PLAYFAIR DISPLAY CSS */}
       <style>
         {`
-          /* Blinking recording light */
-          @keyframes pulse-red {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+          /* Import Playfair Display from Google Fonts */
+          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+          /* This creates the popped-out 3D plastic effect */
+          .neu-flat {
+            border-radius: 20px;
+            background: #e0e5ec;
+            box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.6);
           }
-          .recording-dot {
-            animation: pulse-red 1.5s infinite;
+
+          /* This creates the pressed-in (embedded) screen effect */
+          .neu-pressed {
+            border-radius: 12px;
+            background: #e0e5ec;
+            box-shadow: inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.8);
           }
 
           /* Smooth scanner line for the camera box */
@@ -60,103 +68,97 @@ function App() {
             left: 0;
             width: 100%;
             height: 3px;
-            background: rgba(59, 130, 246, 0.4);
+            background: rgba(37, 99, 235, 0.4);
             animation: scan 3s linear infinite;
-          }
-
-          /* Clean White Panels with Soft Shadows */
-          .clean-panel {
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-            border: 1px solid #e2e8f0;
           }
         `}
       </style>
 
       {/* HEADER */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem' }}>
-        <h1 style={{ color: '#0f172a', fontSize: '2rem', fontWeight: '800', margin: 0, letterSpacing: '-0.5px' }}>
-          <span style={{ color: '#2563eb' }}>6IX LIFEBOT</span> <span style={{ color: '#94a3b8', fontWeight: '400', fontSize: '1.5rem' }}>/ MEDICAL EMERGENCY DRONE (MED)</span>
+        <h1 style={{ fontFamily: '"Playfair Display", serif', color: '#1a202c', fontSize: '2.5rem', fontWeight: '700', margin: 0, letterSpacing: '0.5px' }}>
+          <span style={{ color: '#2563eb' }}>6IX LIFEBOT</span> <span style={{ color: '#718096', fontWeight: '700', fontSize: '1.8rem', fontStyle: 'italic' }}>/ Medical Emergency Drone</span>
         </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: '#ecfdf5', padding: '8px 16px', borderRadius: '50px', border: '1px solid #a7f3d0' }}>
-          <div style={{ width: '12px', height: '12px', backgroundColor: '#10b981', borderRadius: '50%' }}></div>
+        <div className="neu-flat" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 20px', borderRadius: '50px' }}>
+          <div style={{ width: '12px', height: '12px', backgroundColor: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981' }}></div>
           <span style={{ color: '#047857', fontWeight: '700', letterSpacing: '0.5px', fontSize: '0.85rem' }}>LINK ACTIVE</span>
         </div>
       </header>
       
       {/* MAIN GRID */}
-      <div style={{ display: 'flex', gap: '2rem', height: '75vh' }}>
+      <div style={{ display: 'flex', gap: '2.5rem', height: '75vh' }}>
         
-        {/* LEFT: THE MAP */}
-        <div className="clean-panel" style={{ flex: '2.5', overflow: 'hidden', position: 'relative' }}>
+        {/* LEFT: THE MAP (Embedded into the dashboard) */}
+        <div className="neu-pressed" style={{ flex: '2.5', overflow: 'hidden', position: 'relative', border: '4px solid #e0e5ec' }}>
           <MapContainer center={currentPosition} zoom={16} style={{ height: '100%', width: '100%' }}>
-            {/* Standard, crisp, beautiful OpenStreetMap */}
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; OpenStreetMap contributors'
             />
-            {/* Smooth blue flight path */}
             <Polyline positions={flightPath} color="#2563eb" weight={5} opacity={0.8} />
             <Marker position={currentPosition} icon={droneIcon} />
           </MapContainer>
         </div>
 
         {/* RIGHT: THE SIDEBAR */}
-        <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
-          {/* CAMERA FEED */}
-          <div className="clean-panel" style={{ padding: '1.5rem' }}>
+          {/* CAMERA FEED (Popped out container, embedded screen) */}
+          <div className="neu-flat" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 style={{ color: '#64748b', fontSize: '0.85rem', margin: 0, letterSpacing: '1.5px', fontWeight: '700' }}>ESP32-CAM LINK</h2>
-              <span className="recording-dot" style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 'bold' }}>● REC</span>
+              <h2 style={{ color: '#4a5568', fontSize: '0.85rem', margin: 0, letterSpacing: '1.5px', fontWeight: '700' }}>ESP32-CAM LINK</h2>
             </div>
             
-            <div style={{ backgroundColor: '#f8fafc', height: '200px', borderRadius: '12px', position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '2px dashed #cbd5e1' }}>
+            {/* Embedded video screen */}
+            <div className="neu-pressed" style={{ height: '180px', position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <div className="scanner-line"></div>
-              <span style={{ color: '#94a3b8', fontWeight: '600', fontSize: '0.9rem', letterSpacing: '1px', zIndex: 10 }}>
-                WAITING FOR VIDEO SIGNAL...
+              <span style={{ color: '#718096', fontWeight: '600', fontSize: '0.9rem', letterSpacing: '1px', zIndex: 10 }}>
+                WAITING FOR SIGNAL...
               </span>
             </div>
           </div>
 
-          {/* TELEMETRY */}
-          <div className="clean-panel" style={{ padding: '1.5rem', flexGrow: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <h2 style={{ color: '#64748b', fontSize: '0.85rem', margin: '0 0 1rem 0', letterSpacing: '1.5px', fontWeight: '700' }}>LIVE TELEMETRY</h2>
+          {/* TELEMETRY (Popped out container) */}
+          <div className="neu-flat" style={{ padding: '1.5rem', flexGrow: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <h2 style={{ color: '#4a5568', fontSize: '0.85rem', margin: '0 0 1rem 0', letterSpacing: '1.5px', fontWeight: '700' }}>LIVE TELEMETRY</h2>
             
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              {/* Altitude */}
-              <div style={{ flex: 1, backgroundColor: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                <p style={{ color: '#64748b', margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: '600' }}>ALTITUDE</p>
-                <p style={{ fontSize: '2.5rem', margin: '0', fontWeight: '800', color: '#0f172a' }}>
-                  {telemetry.alt} <span style={{ fontSize: '1.2rem', color: '#94a3b8', fontWeight: '600' }}>m</span>
+            <div style={{ display: 'flex', gap: '1.5rem' }}>
+              {/* Altitude (Embedded Data Box) */}
+              <div className="neu-pressed" style={{ flex: 1, padding: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: '#718096', margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: '700' }}>ALTITUDE</p>
+                <p style={{ fontSize: '2.2rem', margin: '0', fontWeight: '800', color: '#2d3748' }}>
+                  {telemetry.alt} <span style={{ fontSize: '1rem', color: '#a0aec0', fontWeight: '600' }}>m</span>
                 </p>
               </div>
 
-              {/* Speed */}
-              <div style={{ flex: 1, backgroundColor: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                <p style={{ color: '#64748b', margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: '600' }}>AIRSPEED</p>
-                <p style={{ fontSize: '2.5rem', margin: '0', fontWeight: '800', color: '#0f172a' }}>
-                  {telemetry.speed} <span style={{ fontSize: '1.2rem', color: '#94a3b8', fontWeight: '600' }}>m/s</span>
+              {/* Speed (Embedded Data Box) */}
+              <div className="neu-pressed" style={{ flex: 1, padding: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: '#718096', margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: '700' }}>SPEED</p>
+                <p style={{ fontSize: '2.2rem', margin: '0', fontWeight: '800', color: '#2d3748' }}>
+                  {telemetry.speed} <span style={{ fontSize: '1rem', color: '#a0aec0', fontWeight: '600' }}>m/s</span>
                 </p>
               </div>
             </div>
 
-            {/* Battery */}
-            <div style={{ backgroundColor: '#f8fafc', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem', border: '1px solid #f1f5f9' }}>
+            {/* Battery (Embedded Track, Popped Out Bar) */}
+            <div style={{ marginTop: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
-                <p style={{ color: '#64748b', margin: '0', fontSize: '0.8rem', fontWeight: '600' }}>PAYLOAD BATTERY</p>
-                <p style={{ margin: '0', fontWeight: '800', fontSize: '1.1rem', color: telemetry.battery > 20 ? '#10b981' : '#ef4444' }}>
+                <p style={{ color: '#718096', margin: '0', fontSize: '0.8rem', fontWeight: '700' }}>PAYLOAD BATTERY</p>
+                <p style={{ margin: '0', fontWeight: '800', fontSize: '1rem', color: telemetry.battery > 20 ? '#10b981' : '#ef4444' }}>
                   {telemetry.battery}%
                 </p>
               </div>
-              <div style={{ height: '10px', backgroundColor: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+              
+              {/* Embedded Track */}
+              <div className="neu-pressed" style={{ height: '16px', padding: '3px' }}>
+                {/* 3D Popped-out filling */}
                 <div style={{ 
                   height: '100%', 
                   width: `${telemetry.battery}%`, 
                   backgroundColor: telemetry.battery > 20 ? '#10b981' : '#ef4444',
                   transition: 'width 0.5s ease-in-out',
-                  borderRadius: '10px'
+                  borderRadius: '10px',
+                  boxShadow: '2px 2px 5px rgba(0,0,0,0.2)'
                 }}></div>
               </div>
             </div>
