@@ -4,7 +4,8 @@ import 'leaflet/dist/leaflet.css'
 import io from 'socket.io-client'
 import L from 'leaflet'
 
-const socket = io('https://lifebot-backend-u26q.onrender.com') // Note: Replace with your actual Render URL!
+// ⚠️ IMPORTANT: Keep your Render URL here!
+const socket = io('https://lifebot-backend-xxxx.onrender.com') 
 
 const droneIcon = new L.Icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/9357/9357591.png',
@@ -16,6 +17,9 @@ function App() {
   const [currentPosition, setCurrentPosition] = useState([12.9716, 77.5946])
   const [flightPath, setFlightPath] = useState([[12.9716, 77.5946]])
   const [telemetry, setTelemetry] = useState({ alt: 0, speed: 0, battery: 100 })
+  
+  // NEW: State to track our payload button animation
+  const [deployStatus, setDeployStatus] = useState('STANDBY')
 
   useEffect(() => {
     socket.on('telemetry_update', (data) => {
@@ -33,30 +37,63 @@ function App() {
     return () => socket.off('telemetry_update')
   }, [])
 
+  // NEW: The function that runs when you click the button
+  const handleDeployPayload = () => {
+    if (deployStatus !== 'STANDBY') return;
+    
+    setDeployStatus('DEPLOYING');
+    
+    // Simulating a 2-second hardware communication delay
+    setTimeout(() => {
+      setDeployStatus('SUCCESS');
+      
+      // Reset the button back to normal after 4 seconds
+      setTimeout(() => {
+        setDeployStatus('STANDBY');
+      }, 4000);
+    }, 2000);
+  }
+
   return (
     <div style={{ backgroundColor: '#e0e5ec', color: '#2d3748', minHeight: '100vh', padding: '2rem', fontFamily: '"Inter", sans-serif', overflow: 'hidden' }}>
       
-      {/* 🚀 3D NEUMORPHIC & PLAYFAIR DISPLAY CSS */}
       <style>
         {`
-          /* Import Playfair Display from Google Fonts */
           @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
 
-          /* This creates the popped-out 3D plastic effect */
           .neu-flat {
             border-radius: 20px;
             background: #e0e5ec;
             box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.6);
           }
 
-          /* This creates the pressed-in (embedded) screen effect */
           .neu-pressed {
             border-radius: 12px;
             background: #e0e5ec;
             box-shadow: inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.8);
           }
 
-          /* Smooth scanner line for the camera box */
+          /* NEW: 3D Button CSS */
+          .neu-btn {
+            width: 100%;
+            padding: 1.2rem;
+            border: none;
+            border-radius: 15px;
+            background: #e0e5ec;
+            box-shadow: 6px 6px 10px rgb(163,177,198,0.6), -6px -6px 10px rgba(255,255,255, 0.8);
+            font-family: "Inter", sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          /* This makes the button press INTO the screen when clicked */
+          .neu-btn:active {
+            box-shadow: inset 4px 4px 8px rgba(163,177,198, 0.7), inset -4px -4px 8px rgba(255,255,255, 0.8);
+          }
+
           @keyframes scan {
             0% { top: 0%; opacity: 0; }
             10% { opacity: 1; }
@@ -88,7 +125,7 @@ function App() {
       {/* MAIN GRID */}
       <div style={{ display: 'flex', gap: '2.5rem', height: '75vh' }}>
         
-        {/* LEFT: THE MAP (Embedded into the dashboard) */}
+        {/* LEFT: THE MAP */}
         <div className="neu-pressed" style={{ flex: '2.5', overflow: 'hidden', position: 'relative', border: '4px solid #e0e5ec' }}>
           <MapContainer center={currentPosition} zoom={16} style={{ height: '100%', width: '100%' }}>
             <TileLayer
@@ -103,13 +140,12 @@ function App() {
         {/* RIGHT: THE SIDEBAR */}
         <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
-          {/* CAMERA FEED (Popped out container, embedded screen) */}
+          {/* CAMERA FEED */}
           <div className="neu-flat" style={{ padding: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h2 style={{ color: '#4a5568', fontSize: '0.85rem', margin: 0, letterSpacing: '1.5px', fontWeight: '700' }}>ESP32-CAM LINK</h2>
             </div>
             
-            {/* Embedded video screen */}
             <div className="neu-pressed" style={{ height: '180px', position: 'relative', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <div className="scanner-line"></div>
               <span style={{ color: '#718096', fontWeight: '600', fontSize: '0.9rem', letterSpacing: '1px', zIndex: 10 }}>
@@ -118,12 +154,11 @@ function App() {
             </div>
           </div>
 
-          {/* TELEMETRY (Popped out container) */}
+          {/* TELEMETRY */}
           <div className="neu-flat" style={{ padding: '1.5rem', flexGrow: '1', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <h2 style={{ color: '#4a5568', fontSize: '0.85rem', margin: '0 0 1rem 0', letterSpacing: '1.5px', fontWeight: '700' }}>LIVE TELEMETRY</h2>
             
             <div style={{ display: 'flex', gap: '1.5rem' }}>
-              {/* Altitude (Embedded Data Box) */}
               <div className="neu-pressed" style={{ flex: 1, padding: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <p style={{ color: '#718096', margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: '700' }}>ALTITUDE</p>
                 <p style={{ fontSize: '2.2rem', margin: '0', fontWeight: '800', color: '#2d3748' }}>
@@ -131,7 +166,6 @@ function App() {
                 </p>
               </div>
 
-              {/* Speed (Embedded Data Box) */}
               <div className="neu-pressed" style={{ flex: 1, padding: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <p style={{ color: '#718096', margin: '0 0 0.5rem 0', fontSize: '0.8rem', fontWeight: '700' }}>SPEED</p>
                 <p style={{ fontSize: '2.2rem', margin: '0', fontWeight: '800', color: '#2d3748' }}>
@@ -140,8 +174,7 @@ function App() {
               </div>
             </div>
 
-            {/* Battery (Embedded Track, Popped Out Bar) */}
-            <div style={{ marginTop: '1.5rem' }}>
+            <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
                 <p style={{ color: '#718096', margin: '0', fontSize: '0.8rem', fontWeight: '700' }}>PAYLOAD BATTERY</p>
                 <p style={{ margin: '0', fontWeight: '800', fontSize: '1rem', color: telemetry.battery > 20 ? '#10b981' : '#ef4444' }}>
@@ -149,9 +182,7 @@ function App() {
                 </p>
               </div>
               
-              {/* Embedded Track */}
               <div className="neu-pressed" style={{ height: '16px', padding: '3px' }}>
-                {/* 3D Popped-out filling */}
                 <div style={{ 
                   height: '100%', 
                   width: `${telemetry.battery}%`, 
@@ -162,6 +193,20 @@ function App() {
                 }}></div>
               </div>
             </div>
+
+            {/* NEW: THE INTERACTIVE DEPLOY BUTTON */}
+            <button 
+              className="neu-btn" 
+              onClick={handleDeployPayload}
+              style={{
+                color: deployStatus === 'STANDBY' ? '#ef4444' : deployStatus === 'DEPLOYING' ? '#f59e0b' : '#10b981',
+                boxShadow: deployStatus !== 'STANDBY' ? 'inset 4px 4px 8px rgba(163,177,198, 0.7), inset -4px -4px 8px rgba(255,255,255, 0.8)' : ''
+              }}
+            >
+              {deployStatus === 'STANDBY' && '⚠ DEPLOY MEDICAL PAYLOAD'}
+              {deployStatus === 'DEPLOYING' && '⚙ OPENING SERVO CLAW...'}
+              {deployStatus === 'SUCCESS' && '✔ PAYLOAD RELEASED'}
+            </button>
 
           </div>
         </div>
