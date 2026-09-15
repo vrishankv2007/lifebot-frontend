@@ -5,7 +5,7 @@ import io from 'socket.io-client'
 import L from 'leaflet'
 
 // ⚠️ IMPORTANT: Keep your Render URL here!
-const socket = io('https://lifebot-backend-u26q.onrender.com') 
+const socket = io( https://lifebot-backend-u26q.onrender.com) 
 
 const droneIcon = new L.Icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/9357/9357591.png',
