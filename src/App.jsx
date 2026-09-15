@@ -5,7 +5,7 @@ import io from 'socket.io-client'
 import L from 'leaflet'
 
 // ⚠️ IMPORTANT: Keep your Render URL here!
-const socket = io('https://lifebot-backend-xxxx.onrender.com') 
+const socket = io('https://lifebot-backend-u26q.onrender.com') 
 
 const droneIcon = new L.Icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/9357/9357591.png',
@@ -54,63 +54,35 @@ function App() {
     }, 2000);
   }
 
-  return (
-    <div style={{ backgroundColor: '#e0e5ec', color: '#2d3748', minHeight: '100vh', padding: '2rem', fontFamily: '"Inter", sans-serif', overflow: 'hidden' }}>
-      
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+ return (
+    <>
+      {/* 1. The Live Drone Video Player */}
+      <div className="w-full h-full min-h-[250px] bg-black rounded-lg overflow-hidden relative shadow-lg">
+        <img 
+          src="http://172.25.202.31:4747/video" 
+          alt="Live Drone Feed" 
+          className="absolute top-0 left-0 w-full h-full object-cover" 
+        />
+      </div>
 
-          .neu-flat {
-            border-radius: 20px;
-            background: #e0e5ec;
-            box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.6);
-          }
-
-          .neu-pressed {
-            border-radius: 12px;
-            background: #e0e5ec;
-            box-shadow: inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.8);
-          }
-
-          /* NEW: 3D Button CSS */
-          .neu-btn {
-            width: 100%;
-            padding: 1.2rem;
-            border: none;
-            border-radius: 15px;
-            background: #e0e5ec;
-            box-shadow: 6px 6px 10px rgb(163,177,198,0.6), -6px -6px 10px rgba(255,255,255, 0.8);
-            font-family: "Inter", sans-serif;
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: 1.5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-          }
-
-          /* This makes the button press INTO the screen when clicked */
-          .neu-btn:active {
-            box-shadow: inset 4px 4px 8px rgba(163,177,198, 0.7), inset -4px -4px 8px rgba(255,255,255, 0.8);
-          }
-
-          @keyframes scan {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-          }
-          .scanner-line {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: rgba(37, 99, 235, 0.4);
-            animation: scan 3s linear infinite;
-          }
-        `}
-      </style>
-
+      {/* 2. Your Custom Neumorphism Styles */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+        
+        .neu-flat {
+          border-radius: 20px;
+          background: #e0e5ec;
+          box-shadow: 9px 9px 16px rgba(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.6);
+        }
+        
+        .neu-pressed {
+          border-radius: 12px;
+          background: #e0e5ec;
+          box-shadow: inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.6);
+        }
+      `}</style>
+    </>
+  );
       {/* HEADER */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem' }}>
         <h1 style={{ fontFamily: '"Playfair Display", serif', color: '#1a202c', fontSize: '2.5rem', fontWeight: '700', margin: 0, letterSpacing: '0.5px' }}>
@@ -211,8 +183,6 @@ function App() {
           </div>
         </div>
       </div>
-    </div>
-  )
 }
 
 export default App
